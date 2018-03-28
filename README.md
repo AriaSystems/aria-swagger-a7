@@ -5,6 +5,8 @@ This project contains swagger files that describe the Aria Core A7 APIs. See the
 links for details on how to use this project to generate an A7 SDK client for any swagger-supported 
 language integration.
 
+swagger files are found in the src/main/resources directory
+
 ## User's guide
 see [usersguide.md](./usersguide.md)
 
