@@ -184,7 +184,7 @@ public class GenericApiIT extends BaseApiIT {
 			return;
 		}
 
-		Long errorCode = extractResponseValue(response, GetterNameErrorCode, Long.class);
+		Long errorCode = errorCodeHandling(response);
 		String errorMessge = extractResponseValue(response, GetterNameErrorMessage, String.class);
 		logger.info("method: {} returns errorCode: {}, errorMessage: {}", method.getName(), errorCode, errorMessge);
 		if (failureCodes.contains(errorCode)) {
@@ -220,6 +220,23 @@ public class GenericApiIT extends BaseApiIT {
 			Assert.fail("there are " + testFailures.size() + " test failures");
 		}
 
+	}
+	
+	/**
+	 * this handles the oddball API: setUsgThresholdM which for legacy reasons
+	 * returns an errorCode as a numeric string instead of a long
+	 * 
+	 * @param response
+	 * @return
+	 */
+	public Long errorCodeHandling(Object response) {
+		try {
+			Long errorCode = extractResponseValue(response, GetterNameErrorCode, Long.class);
+			return errorCode;
+		} catch (ClassCastException e) {
+			String errorCodeString = extractResponseValue(response, GetterNameErrorCode, String.class);
+			return Long.valueOf(errorCodeString);
+		}
 	}
 
 	private List<String> convertSetToSortedList(Set<String> set) {
