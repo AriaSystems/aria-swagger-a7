@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ariasystems.core.client</groupId>
 	<artifactId>aria-swagger-a7</artifactId>
-	<version>17.0.2</version>
+	<version>18</version>
 	<build>
 		<sourceDirectory>${project.build.directory}/generated-sources/src/main/java</sourceDirectory>
 		<testSourceDirectory>src/it/java</testSourceDirectory>
@@ -137,6 +137,25 @@
 									</pluginExecutionFilter>
 									<action>
 										<execute></execute>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											build-helper-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.8,)
+										</versionRange>
+										<goals>
+											<goal>add-source</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
