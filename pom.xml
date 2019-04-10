@@ -1,13 +1,176 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>ariasystems.core.client</groupId>
+	<groupId>ariasystems.api.client</groupId>
 	<artifactId>aria-swagger-a7</artifactId>
-	<version>19</version>
+	<version>21</version>
+	<!-- 
+	there are three sets of profiles that should be specified per maven execution:
+	api, environment, and language
+	Default set of profiles: core, sf, and java
+	If you don't want to use a default profile it requires specifying a value for all three types in the maven call
+	i.e. "mvn clean install -P php,oq,ci"
+	 -->
+	<profiles>
+		<!-- api set profiles -->
+		<profile>
+			<id>core</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>api</name>
+					<value>core</value>
+				</property>
+			</activation>
+			<properties>
+				<apiset>core</apiset>
+			</properties>
+		</profile>
+		<profile>
+			<id>oq</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>api</name>
+					<value>objectquery</value>
+				</property>
+			</activation>
+			<properties>
+				<apiset>objectquery</apiset>
+			</properties>
+		</profile>
+		<!-- environment profiles -->
+		<profile>
+			<id>sf</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>env</name>
+					<value>qu</value>
+				</property>
+			</activation>
+			<properties>
+				<environment>stage-future</environment>
+				<environment.server>https://secure.future.stage.ariasystems.net</environment.server>
+			</properties>
+		</profile>
+		<profile>
+			<id>prod</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>env</name>
+					<value>prod</value>
+				</property>
+			</activation>
+			<properties>
+				<environment>prod</environment>
+				<environment.server>https://secure.ariasystems.net</environment.server>
+			</properties>
+		</profile>
+		<!-- language profiles -->
+		<profile>
+			<id>java</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>lang</name>
+					<value>java</value>
+				</property>
+			</activation>
+			<properties>
+				<language>java</language>
+				<source.main>src/main/java</source.main>
+				<source.it.base>src/it/base/java</source.it.base>
+				<source.it>src/it/${apiset}/java</source.it>
+				<skip.it>${maven.test.skip}</skip.it>
+				<include.it>**/*IT.java</include.it>
+			</properties>
+		</profile>
+		<profile>
+			<id>scala</id>
+			<activation>
+				<property>
+					<name>lang</name>
+					<value>scala</value>
+				</property>
+			</activation>
+			<properties>
+				<language>scala</language>
+				<source.main>src/main/scala</source.main>
+				<maven.test.skip>true</maven.test.skip>
+			</properties>
+		</profile>
+		<profile>
+			<id>php</id>
+			<activation>
+				<property>
+					<name>lang</name>
+					<value>php</value>
+				</property>
+			</activation>
+			<properties>
+				<language>php</language>
+				<source.main>src/main/php</source.main>
+				<package.api>vendor\ariasystems\api</package.api>
+				<package.model>vendor\ariasystems\model</package.model>
+				<maven.test.skip>true</maven.test.skip>
+				<maven.main.skip>true</maven.main.skip>
+			</properties>
+		</profile>
+	</profiles>
 	<build>
-		<sourceDirectory>${project.build.directory}/generated-sources/src/main/java</sourceDirectory>
-		<testSourceDirectory>src/it/java</testSourceDirectory>
+		<sourceDirectory>${project.build.directory}/generated-sources/${source.main}</sourceDirectory>
 		<plugins>
+			<plugin>
+				<groupId>com.soebes.maven.plugins</groupId>
+				<artifactId>echo-maven-plugin</artifactId>
+				<version>0.3.0</version>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>echo</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<echos>
+						<echo>				
+-------------------------------------------------------------------------
+
+				Aria client generator
+						
+				generating SDK: ${apiset} ${core.version} 
+				build: ${sdk.version}
+				environment: ${environment}
+				language: ${language}
+-------------------------------------------------------------------------------
+							
+						</echo>
+					</echos>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.googlecode.maven-download-plugin</groupId>
+				<artifactId>download-maven-plugin</artifactId>
+				<version>1.4.1</version>
+				<executions>
+					<execution>
+						<id>download-swagger</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<url>${environment.server}${swaggerurl}</url>
+							<outputDirectory>${swaggerDirectory}</outputDirectory>
+							<skipCache>true</skipCache>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
@@ -21,7 +184,21 @@
 						</goals>
 						<configuration>
 							<sources>
-								<source>${project.build.directory}/generated-sources/src/main/java/</source>
+								<source>${project.build.directory}/generated-sources/${source.main}</source>
+							</sources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>add-test-source</id>
+						<phase>generate-test-sources</phase>
+						<goals>
+							<goal>add-test-source</goal>
+						</goals>
+						<configuration>
+							<skipAttach>${skip.it}</skipAttach>
+							<sources>
+								<source>${source.it.base}</source>
+								<source>${source.it}</source>
 							</sources>
 						</configuration>
 					</execution>
@@ -38,27 +215,18 @@
 			<plugin>
 				<groupId>io.swagger</groupId>
 				<artifactId>swagger-codegen-maven-plugin</artifactId>
-				<version>2.3.1</version>
+				<version>${swagger-codegen-version}</version>
 				<executions>
 					<execution>
 						<goals>
 							<goal>generate</goal>
 						</goals>
 						<configuration>
-							<apiPackage>ariasystems.core.client.api</apiPackage>
-							<modelPackage>ariasystems.core.client.model</modelPackage>
-						<!-- 
-						    ## Java / Scala 
-							<apiPackage>ariasystems.core.client.api</apiPackage>
-							<modelPackage>ariasystems.core.client.model</modelPackage>
-							## PHP 
-							<apiPackage>vendor\ariasystems\api</apiPackage>
-							<modelPackage>vendor\ariasystems\model</modelPackage>
-						-->
-							<inputSpec>src/main/resources/${file.swagger}</inputSpec>
-							<language>java</language>
-
-						<!-- 
+							<apiPackage>${package.api}${package.suffix}</apiPackage>
+							<modelPackage>${package.model}${package.suffix}</modelPackage>
+							<inputSpec>${swaggerDirectory}/${file.swagger}</inputSpec>
+							<language>${language}</language>
+					<!-- 
 							<language>java</language> 
 							<language>scala</language> - note that scala impl requires scala 2.11  and not the default 2.10 found in the genearted pom.xml
 							<language>akka-scala</language> 
@@ -87,27 +255,57 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.20.1</version>
+				<version>${maven-surefire-version}</version>
+				<configuration>
+					<skipTests>${skip.it}</skipTests>
+				</configuration>
 				<dependencies>
- 					<dependency>
-	  					<groupId>org.apache.maven.surefire</groupId>
+					<dependency>
+						<groupId>org.apache.maven.surefire</groupId>
 						<artifactId>surefire-junit47</artifactId>
-	  					<version>2.20.1</version>
- 					</dependency>
+						<version>${maven-surefire-version}</version>
+					</dependency>
 				</dependencies>
 				<executions>
 					<execution>
 						<id>integration-test</id>
-				        <phase>integration-test</phase>
-				        <goals>
-				           <goal>test</goal>
-				        </goals>
+						<phase>integration-test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
 						<configuration>
+							<skipTests>${skip.it}</skipTests>
 							<includes>
-		              			<include>**/*IT.java</include>
-		            		</includes>					
-		           		</configuration>
-         			</execution>
+								<include>${include.it}</include>
+							</includes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.4</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
@@ -142,6 +340,25 @@
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>
+											com.soebes.maven.plugins
+										</groupId>
+										<artifactId>
+											echo-maven-plugin
+										</artifactId>
+										<versionRange>
+											[0.3.0,)
+										</versionRange>
+										<goals>
+											<goal>echo</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
 											org.codehaus.mojo
 										</groupId>
 										<artifactId>
@@ -152,6 +369,20 @@
 										</versionRange>
 										<goals>
 											<goal>add-source</goal>
+											<goal>add-test-source</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>com.googlecode.maven-download-plugin</groupId>
+										<artifactId>download-maven-plugin</artifactId>
+										<versionRange>[1.4.1,)</versionRange>
+										<goals>
+											<goal>wget</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>
@@ -206,9 +437,9 @@
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-codegen-maven-plugin</artifactId>
-			<version>${swagger-codegen-maven-version}</version>
+			<version>${swagger-codegen-version}</version>
 		</dependency>
-		
+
 		<!-- test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -221,13 +452,13 @@
 			<artifactId>reflections</artifactId>
 			<scope>test</scope>
 			<version>${reflections-version}</version>
-		</dependency>	
+		</dependency>
 	</dependencies>
 	<properties>
 		<java.version>1.8</java.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<!--  jar versions -->
+		<!-- jar versions -->
 		<logback-version>1.2.3</logback-version>
 		<gson-fire-version>1.8.0</gson-fire-version>
 		<swagger-core-version>1.5.15</swagger-core-version>
@@ -237,10 +468,24 @@
 		<maven-plugin-version>1.0.0</maven-plugin-version>
 		<junit-version>4.12</junit-version>
 		<reflections-version>0.9.10</reflections-version>
-		<swagger-codegen-maven-version>2.3.1</swagger-codegen-maven-version>
+		<swagger-codegen-version>2.3.1</swagger-codegen-version>
+		<maven-surefire-version>2.20.1</maven-surefire-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<file.base>all_A7_${project.version}</file.base>
+		<file.base>all_${core.version}</file.base>
 		<file.swagger>${file.base}_swagger.json</file.swagger>
-		<file.jar>${file.base}_aria_sdk</file.jar>
-	</properties>	
+		<file.jar>${apiset}_${file.base}_aria_sdk</file.jar>
+		<swaggerDirectory>${project.build.directory}/generated-resources/src/main/resources</swaggerDirectory>
+		<swaggerurl>/v1/${apiset}/a7/api-docs/all_A7_swagger.json</swaggerurl>
+		<!-- defaults -->
+		<core.version>A7</core.version>
+		<package.suffix></package.suffix>
+		<sdk.version>${project.version}</sdk.version>
+		<package.api>ariasystems.${apiset}.client.api</package.api>
+		<package.model>ariasystems.${apiset}.client.model</package.model>
+		<apiset>core</apiset>
+		<skip.it>true</skip.it>
+		<source.it.base>.</source.it.base>
+		<source.it>.</source.it>
+		<include.it></include.it>
+	</properties>
 </project>
