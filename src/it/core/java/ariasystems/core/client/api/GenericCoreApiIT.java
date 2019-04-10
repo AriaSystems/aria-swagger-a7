@@ -32,7 +32,8 @@ import ariasystems.core.client.ApiClient;
  * @author anorman
  *
  */
-public class GenericApiIT extends BaseApiIT {
+public class GenericCoreApiIT extends BaseCoreApiIT {
+
 	private static final String PackageClientApi = "ariasystems.core.client.api";
 	private static final String PackageClientModel = "ariasystems.core.client.model";
 
@@ -44,7 +45,7 @@ public class GenericApiIT extends BaseApiIT {
 	private static final String SetterNameAuthKey = "setAuthKey";
 	private static final String SetterNameApiClient = "setApiClient";
 
-	private static final Logger logger = LoggerFactory.getLogger(GenericApiIT.class);
+	private static final Logger logger = LoggerFactory.getLogger(GenericCoreApiIT.class);
 
 	private Set<Long> failureCodes = setupFailureCodes();
 
@@ -58,7 +59,10 @@ public class GenericApiIT extends BaseApiIT {
 	private Set<Class<?>> initializeApiClasses() {
 		logger.trace("setting up api classes");
 		Reflections apiPackage = createPackageReflections(PackageClientApi);
-		return apiPackage.getSubTypesOf(Object.class);
+		Set<Class<?>> apiClasses = apiPackage.getSubTypesOf(Object.class);
+		logger.info("adding {} core A7 classes", apiClasses.size());
+
+		return apiClasses;
 	}
 
 	private Map<String, Class<?>> initializeModelClasses() {
@@ -67,14 +71,21 @@ public class GenericApiIT extends BaseApiIT {
 
 		// build the model class map
 		Map<String, Class<?>> classMap = new HashMap<String, Class<?>>();
-		for (Class<?> modelClass : modelPackage.getSubTypesOf(Object.class)) {
-			classMap.put(modelClass.getSimpleName(), modelClass);
-		}
+
+		buildModelClasspathMap(modelPackage, classMap);
+
 		return classMap;
 	}
 
+	private void buildModelClasspathMap(Reflections modelPackage, Map<String, Class<?>> classMap) {
+		for (Class<?> modelClass : modelPackage.getSubTypesOf(Object.class)) {
+			classMap.put(modelClass.getSimpleName(), modelClass);
+		}
+	}
+
 	private static Reflections createPackageReflections(String packageName) {
-		return new Reflections(new ConfigurationBuilder().setScanners(new SubTypesScanner(false)).setUrls(ClasspathHelper.forPackage(packageName))
+		return new Reflections(new ConfigurationBuilder().setScanners(new SubTypesScanner(false))
+				.setUrls(ClasspathHelper.forPackage(packageName))
 				.filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix(packageName))));
 	}
 
@@ -88,13 +99,14 @@ public class GenericApiIT extends BaseApiIT {
 		testComplete.add(method);
 	}
 
-	private void setApiClient(Object apiObject)
-			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-		apiObject.getClass().getDeclaredMethod(SetterNameApiClient, ApiClient.class).invoke(apiObject, createTestApiClient());
+	private void setApiClient(Object apiObject) throws IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException, NoSuchMethodException, SecurityException {
+		apiObject.getClass().getDeclaredMethod(SetterNameApiClient, ApiClient.class).invoke(apiObject,
+				createTestApiClient());
 	}
 
-	private void injectAuthValuesIntoRequest(Object request)
-			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+	private void injectAuthValuesIntoRequest(Object request) throws IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException, NoSuchMethodException, SecurityException {
 		request.getClass().getDeclaredMethod(SetterNameClientNo, Long.class).invoke(request, ClientNoA7);
 		request.getClass().getDeclaredMethod(SetterNameAuthKey, String.class).invoke(request, AuthTokenA7);
 	}
@@ -104,7 +116,8 @@ public class GenericApiIT extends BaseApiIT {
 		try {
 			return (T) (response.getClass().getDeclaredMethod(getter).invoke(response));
 		} catch (Exception e) {
-			throw new RuntimeException("apiResponse: " + response.getClass().getSimpleName() + " method call failure: " + getter, e);
+			throw new RuntimeException(
+					"apiResponse: " + response.getClass().getSimpleName() + " method call failure: " + getter, e);
 		}
 	}
 
@@ -195,13 +208,30 @@ public class GenericApiIT extends BaseApiIT {
 	}
 
 	/**
-	 * this is the Junit integration test that validates that all apis can
-	 * successfully invoke its target Api on the QU system. This test ensures
-	 * that each api can authenticate and find its matching api (which is enough
-	 * to say that the "basic plumbing works for this API")
+	 * this handles the oddball API: setUsgThresholdM which for legacy reasons
+	 * returns an errorCode as a numeric string instead of a long
 	 * 
-	 * This test does not test for valid success calls (i.e. error_code of zero)
-	 * as that scenario will require custom Api specific testing.
+	 * @param response
+	 * @return
+	 */
+	private Long errorCodeHandling(Object response) {
+		try {
+			Long errorCode = extractResponseValue(response, GetterNameErrorCode, Long.class);
+			return errorCode;
+		} catch (ClassCastException e) {
+			String errorCodeString = extractResponseValue(response, GetterNameErrorCode, String.class);
+			return Long.valueOf(errorCodeString);
+		}
+	}
+
+	/**
+	 * this is the Junit integration test that validates that all apis can
+	 * successfully invoke its target Api on the SF system. This test ensures that
+	 * each api can authenticate and find its matching api (which is enough to say
+	 * that the "basic plumbing works for this API")
+	 * 
+	 * This test does not test for valid success calls (i.e. error_code of zero) as
+	 * that scenario will require custom Api specific testing.
 	 */
 	@Test
 	public void testAllApisForConnectivity() {
@@ -213,6 +243,10 @@ public class GenericApiIT extends BaseApiIT {
 			for (Class<?> apiClass : apiClasses) {
 				testApi(apiClass);
 			}
+		} catch (Exception e) {
+			logger.error("unhandled exception caught: " + e);
+			e.printStackTrace();
+			Assert.fail("fatal error: " + e);
 		} finally {
 			writeTestSummary();
 		}
@@ -220,23 +254,6 @@ public class GenericApiIT extends BaseApiIT {
 			Assert.fail("there are " + testFailures.size() + " test failures");
 		}
 
-	}
-	
-	/**
-	 * this handles the oddball API: setUsgThresholdM which for legacy reasons
-	 * returns an errorCode as a numeric string instead of a long
-	 * 
-	 * @param response
-	 * @return
-	 */
-	public Long errorCodeHandling(Object response) {
-		try {
-			Long errorCode = extractResponseValue(response, GetterNameErrorCode, Long.class);
-			return errorCode;
-		} catch (ClassCastException e) {
-			String errorCodeString = extractResponseValue(response, GetterNameErrorCode, String.class);
-			return Long.valueOf(errorCodeString);
-		}
 	}
 
 	private List<String> convertSetToSortedList(Set<String> set) {

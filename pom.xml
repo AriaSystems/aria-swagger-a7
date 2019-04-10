@@ -9,8 +9,8 @@
 	there are three sets of profiles that should be specified per maven execution:
 	api, environment, and language
 	Default set of profiles: core, sf, and java
-	If you don't want to use a default profile it requires specifying a value for all three types in the maven call
-	i.e. "mvn clean install -P php,oq,ci"
+	If you don't want to use the default profiles, then it requires specifying a value for all three profile types in the maven call
+	i.e. "mvn clean install -P php,oq,prod"
 	 -->
 	<profiles>
 		<!-- api set profiles -->
@@ -47,7 +47,7 @@
 				<activeByDefault>true</activeByDefault>
 				<property>
 					<name>env</name>
-					<value>qu</value>
+					<value>sf</value>
 				</property>
 			</activation>
 			<properties>
