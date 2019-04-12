@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
  * test the generated api classes. This test uses a client in the stage future environment
  * 
  * @author anorman
- *
+ * 
  */
 public abstract class BaseApiIT {
 	private static final Logger logger = LoggerFactory.getLogger(BaseApiIT.class);
@@ -25,6 +25,7 @@ public abstract class BaseApiIT {
 	// values from stage future
 	protected static final Long ClientNoA7 = 5000002L;
 	protected static final String AuthTokenA7 = "rSdtXfhdUHk3T3g8YffrppSnVQUw88eQ";
+	protected static final Long AcctNoA7 = 24029325L;
 
 	protected static Set<Long> setupFailureCodes() {
 		Set<Long> codes = new HashSet<Long>();
