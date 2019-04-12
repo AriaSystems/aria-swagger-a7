@@ -51,8 +51,78 @@
 				</property>
 			</activation>
 			<properties>
-				<environment>stage-future</environment>
+				<environment>stage future</environment>
 				<environment.server>https://secure.future.stage.ariasystems.net</environment.server>
+			</properties>
+		</profile>
+		<profile>
+			<id>sfeu</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>env</name>
+					<value>sf-eu</value>
+				</property>
+			</activation>
+			<properties>
+				<environment>stage future - europe</environment>
+				<environment.server>https://secure.future.stage.cph.ariasystems.net</environment.server>
+			</properties>
+		</profile>
+		<profile>
+			<id>sfau</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>env</name>
+					<value>sf-aus</value>
+				</property>
+			</activation>
+			<properties>
+				<environment>stage future - australia</environment>
+				<environment.server>https://secure.future.stage.aus.ariasystems.net</environment.server>
+			</properties>
+		</profile>
+		<profile>
+			<id>sc</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>env</name>
+					<value>sc</value>
+				</property>
+			</activation>
+			<properties>
+				<environment>stage current</environment>
+				<environment.server>https://secure.current.stage.ariasystems.net</environment.server>
+			</properties>
+		</profile>
+		<profile>
+			<id>sceu</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>env</name>
+					<value>sc-eu</value>
+				</property>
+			</activation>
+			<properties>
+				<environment>stage current - europe</environment>
+				<environment.server>https://secure.current.stage.cph.ariasystems.net</environment.server>
+			</properties>
+		</profile>
+		<profile>
+			<id>scau</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>env</name>
+					<value>sc-aus</value>
+				</property>
+			</activation>
+			<properties>
+				<environment>stage current - australia</environment>
+				<environment.server>https://secure.current.stage.aus.ariasystems.net</environment.server>
 			</properties>
 		</profile>
 		<profile>
@@ -69,6 +139,34 @@
 				<environment.server>https://secure.ariasystems.net</environment.server>
 			</properties>
 		</profile>
+		<profile>
+			<id>peu</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>env</name>
+					<value>prod-eu</value>
+				</property>
+			</activation>
+			<properties>
+				<environment>prod - europe</environment>
+				<environment.server>https://secure.prod.cph.ariasystems.net</environment.server>
+			</properties>
+		</profile>
+		<profile>
+			<id>pau</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>env</name>
+					<value>prod-aus</value>
+				</property>
+			</activation>
+			<properties>
+				<environment>prod - australia</environment>
+				<environment.server>https://secure.prod.aus.ariasystems.net</environment.server>
+			</properties>
+		</profile>	
 		<!-- language profiles -->
 		<profile>
 			<id>java</id>
@@ -476,12 +574,12 @@
 		<file.jar>${apiset}_${file.base}_aria_sdk</file.jar>
 		<swaggerDirectory>${project.build.directory}/generated-resources/src/main/resources</swaggerDirectory>
 		<swaggerurl>/v1/${apiset}/a7/api-docs/all_A7_swagger.json</swaggerurl>
+		<package.api>ariasystems.${apiset}.client.api</package.api>
+		<package.model>ariasystems.${apiset}.client.model</package.model>
 		<!-- defaults -->
 		<core.version>A7</core.version>
 		<package.suffix></package.suffix>
-		<sdk.version>${project.version}</sdk.version>
-		<package.api>ariasystems.${apiset}.client.api</package.api>
-		<package.model>ariasystems.${apiset}.client.model</package.model>
+		<sdk.version>${project.version}</sdk.version>		
 		<apiset>core</apiset>
 		<skip.it>true</skip.it>
 		<source.it.base>.</source.it.base>
