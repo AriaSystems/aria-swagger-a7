@@ -1,7 +1,7 @@
-# Users guide for generating Aria Core API clients from Swagger
+# Users guide for generating Aria Core API clients from Swagger / Open API
 
 ## Swagger overview
-We provide a Swagger-based description of our Crescendo core APIs. Swagger is a format for describing REST-based APIs 
+We provide a Swagger-based description of our Crescendo core and object query APIs. Swagger is a format for describing REST-based APIs 
 and can be written in one of two different formats (either JSON or YAML). It can be thought of as a similar mechanism for REST-based APIs 
 as WSDLs are for SOAP-based ones. Compared to WSDL files, Swagger files can contain more information 
 about its described APIs and is also thought to be much more human readable than WSDL.
@@ -10,7 +10,7 @@ by the Swagger open source community. In addition to API SDK generation, Swagger
 HTML-based user interface, "SwaggerUI", that provides a user-friendly way to view APIs, to describe their parameters and responses, and to 
 structure live calls to them.
 
-### Swagger UI
+## Swagger UI
 Swagger UI is the html-based application that reads a Swagger file and renders its 
 information in a user friendly way. You can find an online version of the SwaggerUI 
 [here](http://petstore.swagger.io/). The online SwaggerUI preloads with the 'Swagger Petstore' demo, but you 
@@ -18,7 +18,7 @@ can load any public-accessible Swagger file using the explore link at the top of
 page. In addition to the online copy of Swagger UI, you can also download your own 
 copy that you can run locally and can use with local Swagger files.
 
-### Swagger-codegen
+## Swagger-codegen
 Swagger-codegen is the open source library used to generate typed clients for calling 
 Swagger-defined APIs. This allows for a very seamless way for clients to invoke our 
 APIs. Swagger clients pass arguments and return objects as typed objects. This typed 
@@ -27,7 +27,7 @@ client platforms provide additional ways to make asynchronous calls and can perf
 client-side validations. The open-source community for Swagger-codegen continue to 
 push new functionality out to these platforms over time.
 
-#### languages supported by the Swagger client code generator
+### languages supported by the Swagger client code generator
 
 Swagger community-supported clients include: 
 
@@ -65,9 +65,24 @@ The full list of currently supported clients and languages and more information 
   the generator can be found [here](https://github.com/swagger-api/swagger-codegen#overview) and 
    [here](https://swagger.io/swagger-codegen/)
 
+## Obtaining a swagger file from a target environment
+
+Swagger files are obtained from the target environment that you want Apis described 
+from. Each environment provides 
+an individual swagger file per each describable Api set: (Core or Object Query)
+
+the url for swagger-described core apis:
+    https://{environment host}/v1/core/a7/api-docs/all_A7_swagger.json
+
+the url for swagger-described object-query apis:
+    https://{environment host}/v1/objectquery/a7/api-docs/all_A7_swagger.json
+
+note: we do not offer swagger described apis for the admin tools apis or for any of the A6 
+apis.
+
 ## How to generate client SDKs from Swagger
 
-The Swagger SDKs can be generated in one of two ways.  
+The Swagger SDKs can be generated in one of two ways with the Swagger Codegen open-source library.  
 One way is to generate them using a Maven build script (either directly with the aria-swagger-a7 GitHub 
 project or with your own local script). Another way is to generate them directly via Java.
 
@@ -85,7 +100,74 @@ This approach requires Java 8 and Apache Maven 3.3.3 or greater as prerequisites
 We have a GitHub project, aria-swagger-a7, that can be used to generate an SDK. The project is configured with 
 a Maven pom.xml and a swagger file describing the latest production A7 APIs.  To 
 use this project to generate your SDK clone the aria-swagger-a7 GitHub project locally and follow 
-the configuration and generation steps listed below
+the configuration and generation steps listed below.
+
+to generate an internal SDK from this repository the following command (requires maven):
+
+__mvn clean install__
+
+##### command parameters: 
+
+__-Dapi__
+
+ * applies the api profile (configures the set of APIs to generate)
+ * values:
+    * core - generates a client for Core A7 Apis (default)
+    * objectquery - generates a client for ObjectQuery A7 Apis
+   
+__-Dlang__
+
+ * applies the language profile (configures the language of the client)
+ * values: 
+    * java (default)
+    * php 
+    * scala 
+    * additional supported languages can be added by implementing the language profile pattern
+    
+__-Denv__
+
+ * applies the environment profile (configures the environment to pull the swagger 
+   from)
+ * values: 
+    * sf (default)
+    * sf-eu
+    * sf-aus
+    * sc
+    * sc-eu
+    * sc-aus
+    * prod
+    * prod-eu
+    * prod-aus
+    
+
+##### usage examples:
+
+  * __"mvn clean install"__
+   generates an A7 core java SDK with the current swagger file on the stage future environment. (default 
+   settings)
+   Note: The java profile is enabled to run IT tests against stage future to validate the connectivity of the APIs defined in the SDK
+
+ * __"mvn clean install -Dapi=objectquery -Dlang=php -Denv=prod-eu"__
+    
+   generates an A7 objectquery PHP SDK with the latest swagger form the prod-eu environment
+Note: The php profile uses PHP specfic naming for the generated sdk files and tells maven to not attempt to compile or jar the output
+
+ * __"mvn clean install -Dapi=core -Dlang=scala -Denv=sf-aus"__
+    
+   generates an A7 core scala SDK with the current swagger file on the sf australian environment
+
+ * __"mvn clean install -P php,oq,sc"__
+   generates an A7 objectquery php SDK with the current swagger file on the stage current environment. 
+   (This example uses the shortened -P profile parameter format to chain profiles)
+    
+
+##### additional generation notes:
+
+ * the api,lang, and env parameters apply profiles. If none of these are specified they default to enabling the A7 and java profiles
+ * if the api parameter is set, then the lang and env parameters must also be set.
+ * if the lang parameter is set, then the api and env parameters must also be set.
+ * if the env parameter is set, then the api and lang parameters must also be set.
+ * values used in parameters are case sensitive and are always lower case
 
 #### Using your own Maven project to build an sdk
 If you would rather use your own independent Maven project to generate an SDK you can 
