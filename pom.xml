@@ -201,6 +201,23 @@
 			</properties>
 		</profile>
 		<profile>
+			<id>apex</id>
+			<activation>
+				<property>
+					<name>lang</name>
+					<value>apex</value>
+				</property>
+			</activation>
+			<properties>
+				<language>apex</language>
+				<source.main>src/main/apex</source.main>
+				<source.test>src/test/apex</source.test>
+				<package.api>${apiset}/api</package.api>
+				<package.model>${apiset}/model</package.model>
+				<maven.test.skip>true</maven.test.skip>
+			</properties>
+			</profile>
+		<profile>
 			<id>php</id>
 			<activation>
 				<property>
@@ -336,7 +353,7 @@
 							<language>CsharpDotNet2</language> 
 						-->
 							<configOptions>
-								<sourceFolder>src/main/java</sourceFolder>
+								<sourceFolder>${source.main}</sourceFolder>
 							<!-- 
 								<sourceFolder>src/main/java</sourceFolder> 
 								<sourceFolder>src/main/scala</sourceFolder> 
