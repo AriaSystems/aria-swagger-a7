@@ -241,7 +241,7 @@
 			<plugin>
 				<groupId>com.soebes.maven.plugins</groupId>
 				<artifactId>echo-maven-plugin</artifactId>
-				<version>0.3.0</version>
+				<version>${echo-maven-plugin-version}</version>
 				<executions>
 					<execution>
 						<phase>initialize</phase>
@@ -270,7 +270,7 @@
 			<plugin>
 				<groupId>com.googlecode.maven-download-plugin</groupId>
 				<artifactId>download-maven-plugin</artifactId>
-				<version>1.4.1</version>
+				<version>${download-maven-plugin-version}</version>
 				<executions>
 					<execution>
 						<id>download-swagger</id>
@@ -289,7 +289,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>1.8</version>
+				<version>${build-helper-maven-plugin-version}</version>
 				<executions>
 					<execution>
 						<id>add-source</id>
@@ -321,7 +321,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.3</version>
+				<version>${maven-compiler-plugin-version}</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
@@ -400,7 +400,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.4</version>
+				<version>${maven-javadoc-plugin-version}</version>
+				<configuration>
+					<source>8</source>
+				</configuration>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -413,7 +416,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>2.2.1</version>
+				<version>${maven-source-plugin-version}</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -584,7 +587,13 @@
 		<junit-version>4.12</junit-version>
 		<reflections-version>0.9.10</reflections-version>
 		<swagger-codegen-version>2.3.1</swagger-codegen-version>
-		<maven-surefire-version>2.20.1</maven-surefire-version>
+		<echo-maven-plugin-version>0.4.0</echo-maven-plugin-version>
+		<download-maven-plugin-version>1.6.0</download-maven-plugin-version>
+		<build-helper-maven-plugin-version>3.1.0</build-helper-maven-plugin-version>
+		<maven-compiler-plugin-version>3.8.1</maven-compiler-plugin-version>
+		<maven-javadoc-plugin-version>3.2.0</maven-javadoc-plugin-version>
+		<maven-source-plugin-version>3.2.1</maven-source-plugin-version>
+		<maven-surefire-version>2.22.1</maven-surefire-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<file.base>all_${core.version}</file.base>
 		<file.swagger>${file.base}_swagger.json</file.swagger>
