@@ -23,9 +23,9 @@ public abstract class BaseApiIT {
 	protected static final Long ErrorCodeUnknownError = 1001L;
 
 	// values from stage future
-	protected static final Long ClientNoA7 = 5000002L;
-	protected static final String AuthTokenA7 = "rSdtXfhdUHk3T3g8YffrppSnVQUw88eQ";
-	protected static final Long AcctNoA7 = 24029325L;
+	protected static final Long ClientNoA7 = 0L;
+	protected static final String AuthTokenA7 = "ADDME";
+	protected static final Long AcctNoA7 = 0L;
 
 	protected static Set<Long> setupFailureCodes() {
 		Set<Long> codes = new HashSet<Long>();
